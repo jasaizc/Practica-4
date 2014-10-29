@@ -4,7 +4,8 @@ var sprites = {
     enemy_purple: { sx: 37, sy: 0, w: 42, h: 43, frames: 1 },
     enemy_bee: { sx: 79, sy: 0, w: 37, h: 43, frames: 1 },
     enemy_ship: { sx: 116, sy: 0, w: 42, h: 43, frames: 1 },
-    enemy_circle: { sx: 158, sy: 0, w: 32, h: 33, frames: 1 }
+    enemy_circle: { sx: 158, sy: 0, w: 32, h: 33, frames: 1 },
+    explosion: { sx: 0, sy: 64, w: 64, h: 64, frames: 12 }
 };
 
 
@@ -12,7 +13,7 @@ var enemies = {
     // B, C y E substituirán a los valores por defecto definidos en la
     // variable baseParameters del constructor Enemy(). Ver
     // comentarios en el código del constructor al final del fichero.
-    basic: { x: 100, y: -50, sprite: 'enemy_purple', B: 100, C: 2 , E: 100 }
+    basic: { x: 100, y: -50, sprite: 'enemy_purple', B: 100, C: 2  , E: 100,  }
 
 };
 
@@ -150,8 +151,29 @@ var PlayerShip = function() {
 
 	    // Se añaden al gameboard 2 misiles 
 	    this.board.add(new PlayerMissile(this.x,this.y+this.h/2));
-	    this.board.add(new PlayerMissile(this.x+this.w,this.y+this.h/2));
+	    
 	}
+	if (Game.keys['ball_left']) {
+
+	    Game.keys['fire'] = false;
+	    this.reload = this.reloadTime;
+
+	    // Se añaden al gameboard una bola de fuegos 
+	    this.board.add(new PlayerFireBallLeft(this.x, this.y + this.h / 2));
+
+	}
+	if (Game.keys['ball_right']) {
+
+	    Game.keys['fire'] = false;
+	    this.reload = this.reloadTime;
+
+	    // Se añaden al gameboard 1 bola de fuego 
+	    this.board.add(new PlayerFireBallRight(this.x + this.w, this.y + this.h / 2));
+
+	}
+
+
+
     }
 
     this.draw = function(ctx) {
@@ -163,6 +185,59 @@ var PlayerShip = function() {
 // Los metodos de esta clase los añadimos a su prototipo. De esta
 // forma solo existe una copia de cada uno para todos los misiles, y
 // no una copia para cada objeto misil
+var PlayerFireBallLeft = function (x, y) {
+    this.w = SpriteSheet.map['explosion'].w;
+    this.h = SpriteSheet.map['explosion'].h;
+    this.x = x - this.w / 2;
+    this.y = y - this.h;
+    this.vy = -1500; 
+    this.vx = -200; 
+
+
+};
+PlayerFireBallLeft.prototype.step = function (dt) {
+         this.x += this.vx * dt; 
+         this.y += this.vy * dt; 
+         this.vy=this.vy+150; 
+
+
+         if (this.x < -this.w) {  this.board.remove(this);} 
+
+};
+PlayerFireBallLeft.prototype.draw = function (ctx) {
+    SpriteSheet.draw(ctx, 'explosion', this.x, this.y);
+}
+
+
+var PlayerFireBallRight = function (x, y) {
+    this.w = SpriteSheet.map['explosion'].w;
+    this.h = SpriteSheet.map['explosion'].h;
+    this.x = x - this.w / 2;
+    this.y = y - this.h;
+    this.vy = -1500;
+    this.vx = 200;
+
+
+};
+PlayerFireBallRight.prototype.step = function (dt) {
+    this.x += this.vx * dt;
+    this.y += this.vy * dt;
+    this.vy = this.vy + 150;
+
+
+    if (this.x < -this.w) { this.board.remove(this); }
+
+};
+PlayerFireBallRight.prototype.draw = function (ctx) {
+    SpriteSheet.draw(ctx, 'explosion', this.x, this.y);
+}
+
+
+
+
+
+
+
 var PlayerMissile = function(x,y) {
     this.w = SpriteSheet.map['missile'].w;
     this.h = SpriteSheet.map['missile'].h;
