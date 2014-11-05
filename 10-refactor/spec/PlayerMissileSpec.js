@@ -27,3 +27,70 @@
     la clase en el prototipo
 
 */
+
+
+describe("PayerMissileSpec", function () {
+
+    beforeEach(function () {
+        loadFixtures('index.html');
+        canvas = $('#game')[0];
+        expect(canvas).toExist();
+        ctx = canvas.getContext('2d');
+        expect(ctx).toBeDefined();
+        oldGame = Game;
+    });
+
+    afterEach(function () {
+        Game = oldGame;
+    });
+
+    var foo = new GameBoard();
+
+    it("GameBoard.add(Misiles)", function () {
+
+              Game.initialize("game", sprites, function () { });
+              var object = new PlayerShip();
+              foo.add(object);        //Añadimos el elemento object al GameBoard
+              expect(object.board).toBe(foo); //Comprobamos que tenemos el objeto.          
+               Game.keys['fire'] = true; 
+               spyOn(foo, 'add');
+               Dummy1 = new PlayerMissile(object.x, object.y + object.h / 2);
+               Dummy2 = new PlayerMissile(object.x + object.w, object.y + object.h / 2);
+               object.step(1);
+               expect(foo.add).toHaveBeenCalledWith(Dummy1);
+               expect(foo.add).toHaveBeenCalledWith(Dummy2);
+                
+           }); 
+     
+ 
+       it("Avance de Misiles",function(){ 
+               Game.initialize("game",sprites,function(){}); 
+         
+ 
+              
+               Dummy1 = new PlayerMissile(200,400); 
+               foo.add(Dummy1);
+               foo.resetRemoved();
+               Dummy1.step(1);
+               expect(Dummy1.x).toBe(201);
+               expect(Dummy1.y).toBe(-290);
+           }); 
+        
+       it("Probando el tiro espaciado",function(){ 
+         
+               Game.initialize("game",sprites,function(){});              
+               var object = new PlayerShip();
+               foo.add(object);                
+               Game.keys['fire'] = true; 
+               object.step(1);
+               expect(foo.objects.length).toBe(5); 
+               object.step(100);
+               expect(foo.objects.length).toBe(5);
+               Game.keys['fire'] = false; 
+               object.step(1);
+               Game.keys['fire'] = true; 
+               object.step(1);
+               expect(foo.objects.length).toBe(7);
+           }); 
+});
+

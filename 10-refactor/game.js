@@ -1,7 +1,8 @@
 var sprites = {
     ship: { sx: 0, sy: 0, w: 37, h: 42, frames: 1 },
     missile: { sx: 0, sy: 30, w: 2, h: 10, frames: 1 },
-    enemy_purple: { sx: 37, sy: 0, w: 42, h: 43, frames: 1 }
+    enemy_purple: { sx: 37, sy: 0, w: 42, h: 43, frames: 1 },
+    explosion: { sx: 0, sy: 64, w: 64, h: 64, frames: 12 }
 };
 
 var enemies = {
@@ -141,13 +142,62 @@ var PlayerShip = function() {
 	    this.board.add(new PlayerMissile(this.x,this.y+this.h/2));
 	    this.board.add(new PlayerMissile(this.x+this.w,this.y+this.h/2));
 	}
+	if (Game.keys['ball_left']) {
+
+	    Game.keys['fire'] = false;
+	    this.reload = this.reloadTime;
+
+	    // Se añaden al gameboard una bola de fuegos 
+	    this.board.add(new PlayerFireBallLeft(this.x, this.y + this.h / 2));
+
+	}
+	if (Game.keys['ball_right']) {
+
+	    Game.keys['fire'] = false;
+	    this.reload = this.reloadTime;
+
+	    // Se añaden al gameboard 1 bola de fuego 
+	    this.board.add(new PlayerFireBallRight(this.x + this.w, this.y + this.h / 2));
+
+	}
     }
 }
 
 // Heredamos del prototipo new Sprite()
 PlayerShip.prototype = new Sprite();
 
-
+var PlayerFireBallLeft = function (x, y) {
+    this.setup("explosion", { vy: -1500, vx: -200 });
+    this.x = x - this.w / 2;
+    this.y = y - this.h;
+};
+PlayerFireBallLeft.prototype = new Sprite();
+PlayerFireBallLeft.prototype.step = function (dt) {
+    this.x += this.vx * dt;
+    this.y += this.vy * dt;
+    this.vy = this.vy + 150;
+    if (this.y > Game.height ||
+    this.x < -this.w ||
+    this.x > Game.width) {
+        this.board.remove(this);
+    }
+};
+var PlayerFireBallRight = function (x, y) {
+    this.setup("explosion", { vy: -1500, vx: 200 });
+    this.x = x - this.w / 2;
+    this.y = y - this.h;
+};
+PlayerFireBallRight.prototype = new Sprite();
+PlayerFireBallRight.prototype.step = function (dt) {
+    this.x += this.vx * dt;
+    this.y += this.vy * dt;
+    this.vy = this.vy + 150;
+    if (this.y > Game.height ||
+    this.x < -this.w ||
+    this.x > Game.width) {
+        this.board.remove(this);
+    }
+};
 
 
 // Constructor para los misiles.

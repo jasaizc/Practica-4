@@ -56,3 +56,64 @@
     colisionado con objetos de cierto tipo, no con todos los objetos.
 
 */
+
+
+describe("GameBoardSpec", function () {
+
+
+    beforeEach(function () {
+        loadFixtures('index.html');
+        canvas = $('#game')[0];
+        expect(canvas).toExist();
+        ctx = canvas.getContext('2d');
+        expect(ctx).toBeDefined();
+        oldGame = Game;
+    });
+
+    afterEach(function () {
+        Game = oldGame;
+    });
+
+    var foo = new GameBoard();
+
+    it("GameBoard.add", function () {
+        var object = {};
+        foo.add(object);        //Añadimos el elemento object al GameBoard
+        expect(object.board).toBe(foo); //Comprobamos que tenemos el objeto.
+    });
+    it("GameBoard.overlap", function () {
+        var dummy1 = { sx: 0, sy: 0, w: 1, h: 1};
+        var dummy2 = { sx: 10, sy: 10, w: 1, h: 1};
+        foo.overlap(dummy1, dummy2);            //Comprobamos donde esta el dummy1 respecto al dummy2
+        expect(foo.overlap(dummy1, dummy2)).toBe(dummy1.sx < dummy2.sx);    //Confirmamos que el dummy1 esta a la izquierda del dummy2
+    });
+    it("GameBoard.remove", function ()
+    {
+        var dummy1 = {};
+        foo.add(dummy1);
+        expect(foo.objects.indexOf(dummy1)).toBe(1); //Confirmamos que el objeto se a añadido a la lista
+        foo.resetRemoved();                         //Inicializamos la lista de borrado
+        foo.remove(dummy1);                        //Marcamos el objeto1 para borrarlo.
+        expect(foo.objects.indexOf(dummy1)).toBe(1); //Aqui Todavia no hemos borrado el elemento
+        foo.finalizeRemoved();                      //Una vez pasamos el finalizeRemove, nos desaparece de la lista el valor.
+        expect(foo.objects.indexOf(dummy1)).toBe(-1);  //Comprobamos que la lista no tiene ningun elemento.
+    });
+    it("GameBoard.iterate", function () {
+        var foo = new GameBoard();
+        function Dummy() { this.prueba = function () { } };
+        var o1 = new Dummy();
+        var o2 = new Dummy();
+        var o3 = new Dummy();
+        spyOn(o1, "prueba");
+        spyOn(o2, "prueba");
+        spyOn(o3, "prueba");
+        foo.add(o1);
+        foo.add(o2);
+        foo.add(o3);
+        foo.iterate("prueba", 1);
+        expect(o1.prueba).toHaveBeenCalledWith(1);
+        expect(o2.prueba).toHaveBeenCalledWith(1);
+        expect(o3.prueba).toHaveBeenCalledWith(1);
+    });
+   
+});

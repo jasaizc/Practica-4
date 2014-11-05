@@ -186,57 +186,45 @@ var PlayerShip = function() {
 // forma solo existe una copia de cada uno para todos los misiles, y
 // no una copia para cada objeto misil
 var PlayerFireBallLeft = function (x, y) {
-    this.w = SpriteSheet.map['explosion'].w;
-    this.h = SpriteSheet.map['explosion'].h;
-    this.x = x - this.w / 2;
-    this.y = y - this.h;
-    this.vy = -1500; 
-    this.vx = -200; 
+    this.setup("explosion", { vy: -1500, vx: -200 });
+    this.x = x - this.w/2;  
+    this.y = y - this.h;  
+    }; 
 
+ 
+PlayerFireBallLeft.prototype = new Sprite();
 
-};
+ 
 PlayerFireBallLeft.prototype.step = function (dt) {
-         this.x += this.vx * dt; 
-         this.y += this.vy * dt; 
-         this.vy=this.vy+150; 
-
-
-         if (this.x < -this.w) {  this.board.remove(this);} 
-
-};
-PlayerFireBallLeft.prototype.draw = function (ctx) {
-    SpriteSheet.draw(ctx, 'explosion', this.x, this.y);
-}
-
-
+    this.x += this.vx * dt; 
+    this.y += this.vy * dt; 
+    this.vy=this.vy+150; 
+    if(this.y > Game.height || 
+    this.x < -this.w|| 
+    this.x > Game.width) { 
+        this.board.remove(this); 
+        } 
+    }; 
 var PlayerFireBallRight = function (x, y) {
-    this.w = SpriteSheet.map['explosion'].w;
-    this.h = SpriteSheet.map['explosion'].h;
+    this.setup("explosion", { vy: -1500, vx: -200 });
     this.x = x - this.w / 2;
     this.y = y - this.h;
-    this.vy = -1500;
-    this.vx = 200;
-
-
 };
+
+
+PlayerFireBallRight.prototype = new Sprite();
+
+
 PlayerFireBallRight.prototype.step = function (dt) {
     this.x += this.vx * dt;
     this.y += this.vy * dt;
     this.vy = this.vy + 150;
-
-
-    if (this.x < -this.w) { this.board.remove(this); }
-
+    if (this.y > Game.height ||
+    this.x < -this.w ||
+    this.x > Game.width) {
+        this.board.remove(this);
+    }
 };
-PlayerFireBallRight.prototype.draw = function (ctx) {
-    SpriteSheet.draw(ctx, 'explosion', this.x, this.y);
-}
-
-
-
-
-
-
 
 var PlayerMissile = function(x,y) {
     this.w = SpriteSheet.map['missile'].w;
