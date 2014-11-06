@@ -84,3 +84,62 @@
     jugador, desaparece también.
 
 */
+describe("Clase CollisionsSpec", function () {
+    var canvas, ctx;
+    beforeEach(function () {
+        loadFixtures('index.html');
+        canvas = $('#game')[0];
+        expect(canvas).toExist();
+        ctx = canvas.getContext('2d');
+        expect(ctx).toBeDefined();
+        oldGame = Game;
+        SpriteSheet = {
+            map: {
+                ship: { sx: 0, sy: 0, w: 37, h: 42, frames: 1 },
+                missile: { sx: 0, sy: 30, w: 2, h: 10, frames: 1 },
+                enemy_purple: { sx: 37, sy: 0, w: 42, h: 43, frames: 1 },
+                fireball: { sx: 191, sy: 0, w: 32, h: 25, frames: 1 },
+                explosion: { sx: 0, sy: 64, w: 64, h: 64, frames: 12 }
+            },
+        };
+    });
+
+    it("Destruir Enemigo", function () {
+        var foo_GameBoard = new GameBoard();
+        var foo_misil = new PlayerMissile(7, 7);
+        foo_enemigo = new Enemy({ x: 7, y: 7, sprite: 'enemy_purple', B: 100, C: 2, E: 100, health: 10 });
+        foo_GameBoard.add(foo_enemigo);
+        foo_GameBoard.add(foo_misil);
+        expect(foo_GameBoard.objects[0].sprite).toBe('enemy_purple');
+        expect(foo_GameBoard.objects[1].sprite).toBe('missile');
+        foo_GameBoard.step(2);
+        expect(foo_GameBoard.objects[0]).toBe(undefined);
+        expect(foo_GameBoard.objects[1]).toBe(undefined);
+    });
+    it("Destruir Jugador", function () {
+        var foo_GameBoard = new GameBoard();
+        foo_enemigo = new Enemy({ x: 7, y: 7, sprite: 'enemy_purple', B: 100, C: 2, E: 100 });
+        var foo_jugador = new PlayerShip();
+        foo_jugador.x = 7;
+        foo_jugador.y = 7;
+        foo_GameBoard.add(foo_enemigo);
+        foo_GameBoard.add(foo_jugador);
+        expect(foo_GameBoard.objects[1].sprite).toBe('ship');
+        foo_GameBoard.step(0.01);
+        expect(foo_GameBoard.objects[1]).toBe(undefined);
+    });
+    it("Quitar Vida Enemigo", function () {
+        var foo_GameBoard = new GameBoard();
+        var foo_enemigo = new Enemy({ x: 7, y: 7, sprite: 'enemy_purple', B: 100, C: 2, E: 100, health: 20 });
+        var foo_misil = new PlayerMissile(0, 0);
+        foo_misil.x = 7;
+        foo_misil.y = 7;
+        foo_GameBoard.add(foo_enemigo);
+        foo_GameBoard.add(foo_misil);
+        expect(foo_enemigo.health).toBe(20);
+        foo_GameBoard.step(0.01); 
+        expect(foo_enemigo.health).toBe(10);
+    });
+
+
+});
