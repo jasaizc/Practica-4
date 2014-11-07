@@ -5,6 +5,8 @@ var sprites = {
     enemy_bee: { sx: 79, sy: 0, w: 37, h: 43, frames: 1 },
     enemy_ship: { sx: 116, sy: 0, w: 42, h: 43, frames: 1 },
     enemy_circle: { sx: 158, sy: 0, w: 32, h: 33, frames: 1 },
+    fireball: { sx: 191, sy: 0, w: 32, h: 25, frames: 1 },
+    explosionNave: {sx: 223, sy: 0, w: 46, h: 44, frames: 8},
     explosion: { sx: 0, sy: 64, w: 64, h: 64, frames: 12 }
 };
 
@@ -49,7 +51,7 @@ var startGame = function() {
     Game.setBoard(2,new Starfield(100,1.0,50));
     Game.setBoard(3,new TitleScreen("Alien Invasion", 
                                     "Press fire to start playing",
-                                    playGame));
+                                    playGameLevel1));
 };
 
 
@@ -77,26 +79,49 @@ var level1 = [
     [ 22000,    25000, 400,         'wiggle',   { x: 150 } ],
     [ 22000,    25000, 400,         'wiggle',   { x: 100 } ]
 ];
+var level2 = [
+  //  Comienzo, Fin,   Frecuencia,  Tipo,       Override
+    [0, 4000, 500, 'circle'],
+    [6000, 13000, 800, 'wiggle'],
+    [10000, 16000, 400, 'circle'],
+    [17800, 20000, 500, 'ltr', { x: 50 }],
+    [18200, 20000, 500, 'straight', { x: 90 }],
+    [18200, 20000, 500, 'wiggle', { x: 10 }],
+    [22000, 25000, 400, 'step', { x: 150 }],
+    [22000, 25000, 400, 'wiggle', { x: 100 }],
+    [24000, 20000, 500, 'straight', { x: 90 }],
+    [24800, 20000, 500, 'circle', { x: 50 }],
+    [25200, 20000, 500, 'straight', { x: 90 }],
+    [26000, 20000, 500, 'step', { x: 10 }],
+];
 
 
-
-var playGame = function() {
+var playGameLevel1 = function() {
     var board = new GameBoard();
     board.add(new PlayerShip());
-
     // Se un nuevo nivel al tablero de juego, pasando la definición de
     // nivel level1 y la función callback a la que llamar si se ha
     // ganado el juego
     board.add(new Level(level1, winGame));
-    Game.setBoard(3,board);
-};
+    Game.setBoard(3, board);
 
+};
+var playGameLevel2 = function () {
+    var board = new GameBoard();
+    board.add(new PlayerShip());
+    // Se un nuevo nivel al tablero de juego, pasando la definición de
+    // nivel level1 y la función callback a la que llamar si se ha
+    // ganado el juego
+    board.add(new Level(level2, winGame));
+    Game.setBoard(3, board);
+
+};
 // Llamada cuando han desaparecido todos los enemigos del nivel sin
 // que alcancen a la nave del jugador
 var winGame = function() {
     Game.setBoard(3,new TitleScreen("You win!", 
-                                    "Press fire to play again",
-                                    playGame));
+                                    "Press fire to Next Level",
+                                    playGameLevel2));
 };
 
 
@@ -105,7 +130,7 @@ var winGame = function() {
 var loseGame = function() {
     Game.setBoard(3,new TitleScreen("You lose!", 
                                     "Press fire to play again",
-                                    playGame));
+                                    startGame));
 };
 
 
@@ -191,28 +216,53 @@ var PlayerShip = function() {
     this.x = Game.width/2 - this.w / 2;
     this.y = Game.height - 10 - this.h;
 
-    this.step = function(dt) {
-	if(Game.keys['left']) { this.vx = -this.maxVel; }
-	else if(Game.keys['right']) { this.vx = this.maxVel; }
-	else { this.vx = 0; }
+    this.step = function (dt) {
+        if (Game.keys['left']) { this.vx = -this.maxVel; }
+        else if (Game.keys['right']) { this.vx = this.maxVel; }
+        else { this.vx = 0; }
 
-	this.x += this.vx * dt;
+        this.x += this.vx * dt;
 
-	if(this.x < 0) { this.x = 0; }
-	else if(this.x > Game.width - this.w) { 
-	    this.x = Game.width - this.w;
-	}
+        if (this.x < 0) { this.x = 0; }
+        else if (this.x > Game.width - this.w) {
+            this.x = Game.width - this.w;
+        }
 
-	this.reload-=dt;
-	if(Game.keys['fire'] && this.reload < 0) {
-	    // Esta pulsada la tecla de disparo y ya ha pasado el tiempo reload
-	    Game.keys['fire'] = false;
-	    this.reload = this.reloadTime;
+        this.reload -= dt;
 
-	    // Se añaden al gameboard 2 misiles 
-	    this.board.add(new PlayerMissile(this.x,this.y+this.h/2));
-	    this.board.add(new PlayerMissile(this.x+this.w,this.y+this.h/2));
-	}
+        if (!Game.fireOn) {
+            if (Game.keys['fire'] && this.reload < 0) {
+                // Esta pulsada la tecla de disparo y ya ha pasado el tiempo reload
+                Game.keys['fire'] = false;
+                this.reload = this.reloadTime;
+
+                // Se añaden al gameboard 2 misiles 
+                this.board.add(new PlayerMissile(this.x, this.y + this.h / 2));
+                this.board.add(new PlayerMissile(this.x + this.w, this.y + this.h / 2));
+            }
+        }
+        if (Game.keys['ballleft'] ) {
+
+            Game.keys['fire'] = false;
+            this.reload = this.reloadTime;
+
+            // Se añaden al gameboard una bola de fuegos 
+            this.board.add(new PlayerFireBallLeft(this.x, this.y + this.h / 2));
+
+        }
+         if (Game.keys['ballright'] ) {
+
+            Game.keys['fire'] = false;
+            this.reload = this.reloadTime;
+
+            // Se añaden al gameboard 1 bola de fuego 
+            this.board.add(new PlayerFireBallRight(this.x + this.w, this.y + this.h / 2));
+
+        }
+        if(!Game.keys['fire']){ 
+         Game.fireOn=false; 
+       } 
+
     };
 };
 
@@ -222,11 +272,54 @@ PlayerShip.prototype.type = OBJECT_PLAYER;
 
 // Llamada cuando una nave enemiga colisiona con la nave del usuario
 PlayerShip.prototype.hit = function(damage) {
-    if(this.board.remove(this)) {
-	loseGame();
+    if (this.board.remove(this)) {
+         this.board.add(new Explosion(this.x + this.w / 2,
+                                 this.y + this.h / 2));
+    setTimeout("loseGame()", 800);
+   
+    }
+};
+// Constructor para las bolas de fuego
+var PlayerFireBallLeft = function (x, y) {
+    this.setup("fireball", { vy: -1500, vx: -200, damage: 2 });
+    this.x = x - this.w / 2;
+    this.y = y - this.h;
+};
+PlayerFireBallLeft.prototype = new Sprite();
+PlayerFireBallLeft.prototype.step = function (dt) {
+    this.x += this.vx * dt;
+    this.y += this.vy * dt;
+    this.vy = this.vy + 150;
+    var collision = this.board.collide(this, OBJECT_ENEMY);
+    if (collision) {
+        collision.hit(this.damage);
+        this.board.remove(this);
+    } else if (this.y < -this.h) {
+        this.board.remove(this);
+    }
+
+};
+var PlayerFireBallRight = function (x, y) {
+    this.setup("fireball", { vy: -1500, vx: 200, damage: 2 });
+    this.x = x - this.w / 2;
+    this.y = y - this.h;
+};
+PlayerFireBallRight.prototype = new Sprite();
+PlayerFireBallRight.prototype.step = function (dt) {
+    this.x += this.vx * dt;
+    this.y += this.vy * dt;
+    this.vy = this.vy + 150;
+    var collision = this.board.collide(this, OBJECT_ENEMY);
+    if (collision) {
+        collision.hit(this.damage);
+        this.board.remove(this);
+    } else if (this.y > Game.height || this.x < -this.w || this.x > Game.width) {
+        this.board.remove(this);
     }
 };
 
+PlayerFireBallLeft.prototype.type = OBJECT_PLAYER_PROJECTILE;
+PlayerFireBallRight.prototype.type = OBJECT_PLAYER_PROJECTILE;
 
 // Constructor para los misiles.
 // Los metodos de esta clase los añadimos a su prototipo. De esta
@@ -341,12 +434,29 @@ Enemy.prototype.step = function(dt) {
 Enemy.prototype.hit = function(damage) {
     this.health -= damage;
     if(this.health <= 0) {
-	this.board.add(new Explosion(this.x + this.w/2, 
+	this.board.add(new ExplosionNave(this.x + this.w/2, 
                                      this.y + this.h/2));
 	this.board.remove(this);
     }
 }
 
+
+
+
+var ExplosionNave = function (centerX, centerY) {
+    this.setup('explosionNave', { frame: 0 });
+    this.x = centerX - this.w / 2;
+    this.y = centerY - this.h / 2;
+    this.subFrame = 0;
+};
+ExplosionNave.prototype = new Sprite();
+ExplosionNave.prototype.step = function (dt) {
+    this.frame = Math.floor(this.subFrame++ / 2);
+    if (this.subFrame >= 24) {
+        this.board.remove(this);
+        
+    }
+}
 
 // Constructor para la explosión
 
@@ -356,13 +466,11 @@ var Explosion = function(centerX,centerY) {
     this.y = centerY - this.h/2;
     this.subFrame = 0;
 };
-
 Explosion.prototype = new Sprite();
-
 Explosion.prototype.step = function(dt) {
     this.frame = Math.floor(this.subFrame++ / 2);
     if(this.subFrame >= 24) {
-	this.board.remove(this);
+        this.board.remove(this);       
     }
 }
 

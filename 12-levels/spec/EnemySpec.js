@@ -61,3 +61,69 @@
 
 */
 
+describe("Clase EnemySpec", function(){ 
+       var canvas, ctx; 
+ 
+       beforeEach(function () {
+           loadFixtures('index.html');
+           canvas = $('#game')[0];
+           expect(canvas).toExist();
+           ctx = canvas.getContext('2d');
+           expect(ctx).toBeDefined();
+           oldGame = Game;
+           SpriteSheet = { 
+               map: {
+                   ship: { sx: 0, sy: 0, w: 37, h: 42, frames: 1 },
+                   missile: { sx: 0, sy: 30, w: 2, h: 10, frames: 1 },
+                   enemy_purple: { sx: 37, sy: 0, w: 42, h: 43, frames: 1 },
+                   enemy_bee: { sx: 79, sy: 0, w: 37, h: 43, frames: 1 },
+                   enemy_ship: { sx: 116, sy: 0, w: 42, h: 43, frames: 1 },
+                   enemy_circle: { sx: 158, sy: 0, w: 32, h: 33, frames: 1 },
+                   explosion: { sx: 0, sy: 64, w: 64, h: 64, frames: 12 }
+               }, 
+               draw: function(){}, 
+           }; 
+       
+
+       });
+       
+    
+ 
+
+       afterEach(function () {
+           Game = oldGame;
+       });
+       var foo = new GameBoard();
+
+   it("Dibujar",function(){ 
+     
+       basic = { x: 100, y: -50, sprite: 'enemy_purple', B: 100, C: 2, E: 100 }
+
+             enemy= new Enemy(basic);             
+             foo.add(enemy);
+             foo.add(new Enemy(basic, { x: 250 }));
+             spyOn(SpriteSheet, "draw"); 
+             enemy.draw(ctx); 
+             expect(SpriteSheet.draw).toHaveBeenCalled(); 
+             expect(SpriteSheet.draw.calls[0].args[1]).toEqual("enemy_purple"); 
+             expect(SpriteSheet.draw.calls[0].args[2]).toEqual(enemy.x); 
+             expect(SpriteSheet.draw.calls[0].args[3]).toEqual(enemy.y);    
+         });  
+     it("Proceso",function(){ 
+          
+           enemy = new Enemy({ x: 100, y: -50, sprite: 'enemy_purple', B: 100, C: 2 , E: 100 }); 
+
+           foo.add(enemy);
+           spyOn(foo, "remove");
+           enemy.step(100); 
+           expect(foo.remove).toHaveBeenCalled();
+        }); 
+
+ }); 
+
+
+
+
+
+
+

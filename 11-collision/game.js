@@ -192,6 +192,7 @@ PlayerFireBallLeft.prototype.step = function (dt) {
     this.x += this.vx * dt;
     this.y += this.vy * dt;
     this.vy = this.vy + 150;
+    var collision = this.board.collide(this, OBJECT_ENEMY);
     if (this.y > Game.height || this.x < -this.w || this.x > Game.width) {
         this.board.remove(this);
     }

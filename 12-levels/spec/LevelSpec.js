@@ -51,3 +51,50 @@
         el nivel ni enemigos en el tablero de juegos.
 
 */
+describe("Clase LevelSpec", function () {
+    var canvas, ctx;
+    beforeEach(function () {
+        loadFixtures('index.html');
+        canvas = $('#game')[0];
+        expect(canvas).toExist();
+        ctx = canvas.getContext('2d');
+        expect(ctx).toBeDefined();
+        oldGame = Game;
+        SpriteSheet = {
+            map: {
+                ship: { sx: 0, sy: 0, w: 37, h: 42, frames: 1 },
+                missile: { sx: 0, sy: 30, w: 2, h: 10, frames: 1 },
+                enemy_purple: { sx: 37, sy: 0, w: 42, h: 43, frames: 1 },
+                fireball: { sx: 191, sy: 0, w: 32, h: 25, frames: 1 },
+                explosion: { sx: 0, sy: 64, w: 64, h: 64, frames: 12 }
+            },
+        };
+    });
+    it("Nuevo Nivel",function(){ 
+         var level1 = [
+                         [0, 4000, 500, 'step'],
+                         [6000, 13000, 800, 'ltr'],
+                         [10000, 16000, 400, 'circle'],
+         		]; 
+         		var nuevoNivel = new Level(level1, winGame); 
+         		expect(nuevoNivel.levelData.length).toEqual(3);
+         		expect(nuevoNivel.callback).toBe(winGame);
+         	}); 
+    it("Pasar Nivel", function () {
+        var foo_GameBoard = new GameBoard();
+        var level1 = [
+                         [0, 4000, 500, 'step'],
+                         [6000, 13000, 800, 'ltr'],
+                         [10000, 16000, 400, 'circle'],
+        ];
+        var nuevoNivel = new Level(level1, winGame);
+        foo_GameBoard.add(nuevoNivel);
+        spyOn(nuevoNivel, "callback");
+        nuevoNivel.board.cnt[OBJECT_ENEMY] = 0;
+        nuevoNivel.step(26);
+        expect(nuevoNivel.callback).toHaveBeenCalled();
+    });
+
+})
+
+
